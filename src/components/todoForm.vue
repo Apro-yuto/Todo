@@ -1,133 +1,144 @@
 <template>
   <div class="todoForm">
-    <form class="todo_form">
-
-      <div class="todo_name">
-        <input
-        v-model="todos.todoName"
-        type="text"
-        name="todoName"
-        placeholder="TODO"
-        class="todo_name-input">
-      </div>
-
-      <div class="todo_select">
-        <label for="important">重要度</label>
-        <div class="todo_select-body">
-        <select 
-          v-model="todos.important"
-          name="important" 
-          class="todo_select-area">
-            <option value="default" selected>-</option>
-            <option value="1">高</option>
-            <option value="0">低</option>
-        </select>
-        </div>
-      </div>
-
-      <div class="todo_select">
-        <label for="emergency">緊急度</label>
-        <div class="todo_select-body">
-          <select 
-            v-model="todos.emargency"
-            name="emergency" 
-            class="todo_select-area"
+    <div v-show="existOpenForm" class="todoFlex">
+      <form class="todo_form">
+        <div class="todo_name">
+          <input
+            v-model="todos.todoName"
+            type="text"
+            name="todoName"
+            placeholder="TODO"
+            class="todo_name-input"
           >
-            <option value="default" selected>-</option>
-            <option value="1">高</option>
-            <option value="0">低</option>
-          </select>
         </div>
-      </div>
-
-      <input 
-        v-model="todos.todoDate"
-        type="datetime-local" 
-        class="todo_date"
-      >
-
+  
+        <div class="todo_select">
+          <label for="important">重要度</label>
+          <div class="todo_select-body">
+          <select 
+            v-model="todos.important"
+            name="important" 
+            class="todo_select-area">
+              <option value="default" selected>-</option>
+              <option value="1">高</option>
+              <option value="0">低</option>
+          </select>
+          </div>
+        </div>
+  
+        <div class="todo_select">
+          <label for="emergency">緊急度</label>
+          <div class="todo_select-body">
+            <select 
+              v-model="todos.emergency"
+              name="emergency" 
+              class="todo_select-area"
+            >
+              <option value="default" selected>-</option>
+              <option value="1">高</option>
+              <option value="0">低</option>
+            </select>
+          </div>
+        </div>
+  
+        <input 
+          v-model="todos.todoDate"
+          type="datetime-local" 
+          class="todo_date"
+        >
+  
+        <button 
+          @click="updateTodo($event)"
+          class="todo_submit"
+        >
+        登録
+        </button>
+      </form>
+      <template v-if="error.existError === true">
+        <div class="error">
+          <p v-for="item in error.errorArr" :key="item.id">
+            {{item}}
+          </p>
+        </div>
+      </template>
       <button 
-        @click="updateTodo($event)"
-        class="todo_submit"
+        @click="isDetailopen"
+        class="moreBtn"
       >
-      登録
+      詳しく書く
       </button>
-    </form>
-    <template v-if="error.existError === true">
-      <div class="error">
-        <p v-for="item in error.errorArr" :key="item.id">
-          {{item}}
-        </p>
-      </div>
-    </template>
-    <button 
-      @click="isDetailopen"
-      class="moreBtn"
-    >
-    詳しく書く
-    </button>
       <template
         v-if="detailOpen === true"
         class="todo_detail"
       >
-        <li 
+        <li
           v-for="item in todos.detailArr"
           :key="item.id"
           class="todo_detail-item pipe"
         >
-        <div class="todo_detail-contents">
-          <p>・{{item.name}}</p>
-          <input 
-            v-model="item.date"
-            type="datetime-local"
-          >
-        </div>
+          <div class="todo_detail-contents">
+            <input 
+              type="text" 
+              v-model="item.name"
+              class="detailName"
+            >
+            <input 
+              v-model="item.date"
+              type="datetime-local"
+              class="detailDate"
+            >
+          </div>
         </li>
-      <div class="todo_detail-add pipe">
-        <input
-          v-model="detailName"
-          placeholder="loadmap"
-          type="text">
-        <input
-          v-model="detailDate"
-          type="datetime-local"
-          class="todo_detail-date"
-        >
-        <button
-          @click="updateDetail($event)"
-        >追加</button>
-      </div>
-      <template v-if="error.existDetailError === true ">
-        <ul class="todo_detail-err">
-          <li
-            v-for="item in error.detailErrorArr"
-            :key="item.id"
+        <div class="todo_detail-add pipe">
+          <input
+            v-model="detailName"
+            placeholder="loadmap"
+            type="text">
+          <input
+            v-model="detailDate"
+            type="datetime-local"
+            class="todo_detail-date"
           >
-          {{ item }}
-          </li>
-        </ul>
+          <button
+            @click="updateDetail($event)"
+          >追加</button>
+        </div>
+        <template v-if="error.existDetailError === true ">
+          <ul class="todo_detail-err">
+            <li
+              v-for="item in error.detailErrorArr"
+              :key="item.id"
+            >
+            {{ item }}
+            </li>
+          </ul>
+        </template>
       </template>
-      </template>
+    </div>
+  <div 
+    class="slideToggle" 
+    @click="existOpenForm = existOpenForm === false ? true : false"
+  >
+    <img src="@/assets/img/right_arrow.svg" alt=""></div>
   </div>
 </template>
 
 <script>
 export default {
   name: 'todo-Form',
-  props: {
-    todo: Object,
-  },
   data() {
     return {
+      existOpenForm: false,
       detailOpen: false,
       detailDate: '',
       detailName: '',
       todos: {
+        Uid: '',
         todoName: '',
         important: '',
-        emargency: '',
+        emergency: '',
         todoDate: '',
-        detailArr: new Array(),
+        detailArr: new Array()
       },
       detailObj: {
         name: '',
@@ -152,28 +163,33 @@ export default {
     updateTodo: function(e) {
       e.preventDefault()
 
-      this.error.errorArr = new Array()
       this.invalidTodo()
-
       if(this.error.existError === true) return false
-      console.log(this.todos)
-      this.$emit('updateTodo', this.todos)
 
-      this.$nextTick(function() {
-        this.$set(this.todos, 'todoName' , "")
-        this.$set(this.todos, 'important' , "")
-        this.$set(this.todos, 'emargency' , "")
-        this.$set(this.todos, 'todoDate' , "")
-        this.$set(this.todos, 'detailArr' , [])
-      })
+      this.getUniqueStr(2)
+
+      this.$emit('updateTodo',Object.assign({}, this.todos)) // todosの情報をlocalstorageにpush
+
+      this.$set(this.todos, 'todoName' , "")
+      this.$set(this.todos, 'important' , "")
+      this.$set(this.todos, 'emergency' , "")
+      this.$set(this.todos, 'todoDate' , "")
+      this.$set(this.todos, 'detailArr' , [])
+      this.$set(this.todos, 'detailArr' , [])
+    },
+    getUniqueStr: function (myStrong){
+      var strong = 1000;
+      if (myStrong) strong = myStrong;
+      var result = new Date().getSeconds().toString(16)  + Math.floor(strong*Math.random()).toString(16)
+      this.todos.Uid = result
+      console.log({result})
     },
     updateDetail: function(e) {
       e.preventDefault()
 
-      this.error.detailErrorArr = new Array()
       this.invalidDetail()
-
       if(this.error.existDetailError === true) return false
+
       console.log(this.detailObj)
       this.detailObj.name = this.detailName
       this.detailObj.date = this.detailDate
@@ -184,9 +200,11 @@ export default {
       this.detailDate = ''
     },
     invalidTodo: function() {
+      this.error.errorArr = new Array()
+
       let todoName = this.todos.todoName
       let important = this.todos.important
-      let emargency = this.todos.emargency
+      let emergency = this.todos.emergency
       let todoDate = this.todos.todoDate
 
       if(todoName.length == 0) {
@@ -197,7 +215,7 @@ export default {
         this.error.existError = true
         this.error.errorArr.push('重要度を選択してください。')
       }
-      if(emargency === 'default' || emargency === '') {
+      if(emergency === 'default' || emergency === '') {
         this.error.existError = true
         this.error.errorArr.push('緊急度を選択してください。')
       }
@@ -205,8 +223,10 @@ export default {
         this.error.existError = true
         this.error.errorArr.push('期日を選択してください。')
       }
+      else if(this.error.errorArr.length === 0) this.error.existError = false
     },
     invalidDetail: function() {
+      this.error.detailErrorArr = new Array()
       let detailName = this.detailName
       let detailDate = this.detailDate
 
@@ -218,7 +238,8 @@ export default {
         this.error.existDetailError = true
         this.error.detailErrorArr.push('期日を選択してください。')
       }
-    }
+      else if(this.error.detailErrorArr.length === 0) this.error.existDetailError = false
+    },
   },
   updated: function() {
     console.log(this.todos, this.detailObj)
@@ -226,7 +247,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 
 %formBtn {
   font-size: 14px;
@@ -275,18 +296,32 @@ export default {
   }
 }
 
+.slideToggle {
+  width: 35px;
+  height: 100%;
+  display: flex;
+  border: 2px solid #111;
+  border-left: 0;
+  border-radius: 0 15px 15px 0;
+  box-shadow: 3px 3px #ccc;
+}
+
 .todo {
   &Form {
-    width: 900px;
-    margin: 0 auto;
-    padding: 78px 50px 50px;
+    display: flex;
+  }
+  &Flex {
+    width: 500px;
+    padding-right: 0;
+    margin-left: 5px; 
     border: 3px solid #000;
-    border-radius: 15px;
-    box-shadow: 5px 5px #ccc
+    padding: 30px;
+    border-right: 2px solid #000;
   }
   &_name {
+    width: 100%;
     &-input {
-      width: 250px;
+      width: 100%;
       border: 3px solid #000;
       transition: .3s;
       padding: 5px;
@@ -299,14 +334,14 @@ export default {
     &_form {
       display: flex;
       flex-wrap: wrap;
-      justify-content: space-between;
       align-items: center;
     }
   &_date {
     display: block;
     width: 200px;
-    margin-left: 30px;
     @extend %date;
+    margin-left: 0; 
+    margin-top: 20px;
   }
   &_submit {
     @extend %formBtn;
@@ -314,9 +349,12 @@ export default {
     margin-top: 25px;
   }
   &_select {
-    margin-left: 20px;
     display: flex;
     align-items: center;
+    margin-top: 20px;
+    &:last-of-type {
+      margin-left: 20px;
+    }
     &-body {
       display: inline-block;
       margin-left: 15px;
@@ -349,7 +387,7 @@ export default {
     &-contents {
       display: flex;
       align-items: center;
-      input {
+      .detailDate {
         @extend %date;
         border-width: 1px;
         margin-left: 50px;
@@ -357,53 +395,25 @@ export default {
     }
     &-add {
       input {
-        margin-top: 15px;
+        margin-top: 25px;
         @extend %date;
+        &:first-child {
+          width: 100%;
+        }
+        &:last-child {
+          margin-left: 0;
+        }
       }
       button {
         margin-top: 15px;
-        margin-left: 20px;
+        margin-left: 40px;
         @extend %formBtn;
       }
     }
     &-date {
       @extend %date;
-      margin-left: 15px;
     }
   }
 }
 
-// animation 
-.Down {
-  &-enter {
-    opacity: 0;
-    &-to {
-      opacity: 1;
-    }
-    &-active {
-      transition: opacity .5s;
-    }
-  }
-  &-leave {
-    opacity: 1;
-    &-to {
-      opacity: 0;
-    }
-    &-active {
-      transition: all .3s;
-    }
-  }
-}
-
-@keyframes silideDown {
-  from {
-    opacity: 0;
-  }
-  25% {
-    opacity: 1;
-  }
-  to {
-    opacity: 1;
-  }
-}
 </style>
